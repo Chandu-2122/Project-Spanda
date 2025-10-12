@@ -5,3 +5,6 @@ opencv-python
 requests
 wikipedia
 pywhatkit
+pyjokes
+pyautogui
+pygetwindow

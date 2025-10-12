@@ -4,12 +4,16 @@ import pyttsx3
 import speech_recognition as sr
 import cv2
 import random
-import requests
+from requests import get
 import wikipedia
 import webbrowser
-import pywhatkit
+import pywhatkit as kit
 import traceback
 import sys
+import time
+import pyjokes
+import pyautogui
+import pygetwindow as gw
 
 #defaulting webbrowser to brave
 brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
@@ -46,6 +50,7 @@ def wish():
             None
         """
     hour = int(datetime.datetime.now().hour)
+    tt = time.strftime("%I:%M %p")
     if hour >= 0 and hour < 12:
         greeting = "Good Morning C"
     elif hour >= 12 and hour < 18:
@@ -53,7 +58,7 @@ def wish():
     else:
         greeting = "Good Evening C"
 
-    full_message = f"{greeting}. I am Project Spanda. Please tell me how may I help you now."
+    full_message = f" It's {tt}, {greeting}. I am Project Spanda. Please tell me how may I help you now."
     speak(full_message)
 
 #function to generate text from speech
@@ -75,7 +80,7 @@ def takecommand():
     with sr.Microphone() as source:
         print("Listening...")
         r.pause_threshold = 1
-        audio = r.listen(source, timeout=5, phrase_time_limit=5)
+        audio = r.listen(source)#, timeout=4, phrase_time_limit=8)
 
     try:
         print("Recognizing...")
@@ -95,10 +100,22 @@ def play_first_youtube_video(search_query):
     speak(f"Searching YouTube for {search_query}")
     try:
         speak(f"Playing {search_query} on YouTube...")
-        import pywhatkit as kit
         kit.playonyt(search_query)
     except Exception as e:
         speak("Something went wrong while opening YouTube.")
+        print("Error:", e)
+
+#closing opened applications
+def close_application(app_name):
+    """
+    Closes an application using its process name.
+    Examples: 'notepad.exe', 'cmd.exe'
+    """
+    try:
+        os.system(f"taskkill /f /im {app_name}")
+        speak(f"Closed {app_name.replace('.exe', '')}")
+    except Exception as e:
+        speak("Couldn't close the application.")
         print("Error:", e)
 
 
@@ -181,9 +198,108 @@ if __name__ == '__main__':
             elif "open github" in query:
                 speak("Opening github...")
                 webbrowser.get('brave').open("github.com")
+            elif "close notepad" in query:
+                close_application("notepad.exe")
+            elif "close command prompt" in query or "close cmd" in query:
+                close_application("cmd.exe")
+            elif "close browser" in query:
+                # Choose the browser you use
+                close_application("brave.exe")  # or "chrome.exe", "firefox.exe"
+            #elif "set alarm" in query:
+            elif "tell me a joke" in query or "tell a joke" in query:
+                joke = pyjokes.get_joke(language="en")
+                speak(joke)
+            elif "switch the window" in query or "switch window" in query:
+                speak("Switching the window...")
+                pyautogui.hotkey("alt", "tab")
+            elif "show opened windows" in query or "show windows" in query:
+                speak("Showing opened windows...")
+                pyautogui.hotkey("win", "tab")
+                while True:
+                    command = takecommand().lower()
+                    if "next" in command:
+                        pyautogui.press("right")
+                    elif "back" in command:
+                        pyautogui.press("left")
+                    elif "enter" in command:
+                        pyautogui.press("enter")
+                        break
+                    elif "cancel" in command or "exit" in command:
+                        pyautogui.press("esc")
+                        speak("Exited Task View.")
+                        break
+            elif "go to desktop" in query:
+                speak("Going to desktop...")
+                pyautogui.hotkey("win", "d")
+            elif "lock the screen" in query or "lock the system" in query:
+                speak("Locking the screen...")
+                os.system("rundll32.exe user32.dll,LockWorkStation")
+            elif "go to next tab" in query or "switch to next tab" in query or "next tab" in query:
+                speak("Switching to next tab...")
+                pyautogui.hotkey("ctrl", "tab")
+                time.sleep(1)  # Wait for tab to switch
+                # Get the title of the active window
+                active_window = gw.getActiveWindow()
+                if active_window:
+                    title = active_window.title
+                    if title.strip():
+                        speak(f"You are now on: {title} tab")
+                    else:
+                        speak("I switched the tab, but couldn't detect the title.")
+                else:
+                    speak("I switched the tab, but couldn't detect the window.")
+            elif "go to previous tab" in query or "switch to previous tab" in query or "previous tab" in query:
+                speak("Switching to previous tab...")
+                pyautogui.hotkey("ctrl","shift", "tab")
+                time.sleep(1)  # Wait for tab to switch
+                # Get the title of the active window
+                active_window = gw.getActiveWindow()
+                if active_window:
+                    title = active_window.title
+                    if title.strip():
+                        speak(f"You are now on: {title} tab")
+                    else:
+                        speak("I switched the tab, but couldn't detect the title.")
+                else:
+                    speak("I switched the tab, but couldn't detect the window.")
+            elif "close current tab" in query or "close the current tab" in query or "current tab" in query:
+                active_window = gw.getActiveWindow()
+                if active_window:
+                    title = active_window.title
+                    if title.strip():
+                        speak(f"Closing: {title} tab")
+                        pyautogui.hotkey("ctrl", "w")
+                else:
+                    speak("Couldn't detect an active window.")
+            elif "pause the video" in query or "pause video" in query:
+                speak("Pausing the video...")
+                pyautogui.press("k")
+            elif "play the video" in query or "play video" in query:
+                speak("Playing the video...")
+                pyautogui.press("k")
+            elif "mute the video" in query or "mute video" in query:
+                speak("Muting the video...")
+                pyautogui.press('m')
+            elif "unmute the video" in query or "unmute video" in query:
+                speak("Unmuting the video...")
+                pyautogui.press('m')
+            elif "full screen" in query:
+                speak("Fullscreening the video...")
+                pyautogui.press("f")
+            elif "exit fullscreen" in query:
+                speak("Exiting fullscreen...")
+                pyautogui.press("esc")
+            elif "shutdown the system" in query:
+                speak("Shutting down the system...")
+                os.system("shutdown /s")
+            elif "restart" in query:
+                speak("Restarting the system...")
+                os.system("shutdown /r")
+
             elif any(phrase in query for phrase in ["bye", "quit", "exit", "leave"]):
                 speak("Okay, Goodbye! Have a great day C.")
                 sys.exit()
+            time.sleep(0.5)
             speak("Do you want any other help, C?")
     #takecommand()
     #speak("Hello")

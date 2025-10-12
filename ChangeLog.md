@@ -3,15 +3,31 @@
 All notable changes to **Project Spanda** will be documented in this file.
 
 ---
+
 ## [1.1.0] - 2025-10-12
-### Added
-- Wikipedia integration
-- YouTube search and playback
-- Application opening commands (Notepad, CMD)
-### Fixed
-- YouTube playback using `youtube-search-python`
+### App & Window Control + Media Actions
+#### Added
+- Voice-controlled closing of Notepad, Command Prompt, and Browser
+- Tells jokes on command
+- System shutdown and restart via voice
+- Locking the screen using voice command
+- Minimize all windows (go to desktop)
+- Switch between windows using "alt + tab"
+- Open Task View and navigate between open windows (with voice-based "next", "back", "enter", "cancel")
+- Tab navigation in browsers:
+  - Switch to next/previous tab with window title feedback
+  - Close current tab and announce its title
+- Basic YouTube controls via voice:
+  - Play/pause video
+  - Mute/unmute video
+  - Fullscreen and exit fullscreen
+#### Fixed
+- Mentioning time while greeting
 
-
+#### Need To Fix/Add
+- Avoid closing apps that aren’t actually open
+- Alarm setting functionality
+- Read latest news
 ---
 
 ## [1.0.0] - 2025-10-12
