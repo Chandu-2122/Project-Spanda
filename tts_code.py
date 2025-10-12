@@ -2,6 +2,17 @@ import datetime
 import os
 import pyttsx3
 import speech_recognition as sr
+import cv2
+import random
+import requests
+import wikipedia
+import webbrowser
+import pywhatkit as kit
+import traceback
+
+#defaulting webbrowser to brave
+brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
+webbrowser.register('brave', None, webbrowser.BackgroundBrowser(brave_path))
 
 #function to generate speech from text
 def speak(text):
@@ -78,6 +89,18 @@ def takecommand():
         return "None"
     return query
 
+#plays first youtube video from search results
+def play_first_youtube_video(search_query):
+    speak(f"Searching YouTube for {search_query}")
+    try:
+        speak(f"Playing {search_query} on YouTube...")
+        import pywhatkit as kit
+        kit.playonyt(search_query)
+    except Exception as e:
+        speak("Something went wrong while opening YouTube.")
+        print("Error:", e)
+
+
 if __name__ == '__main__':
     wish()
     while True:
@@ -95,7 +118,71 @@ if __name__ == '__main__':
                 os.system("start cmd")
             elif "open camera" in query:
                 speak("Opening camera...")
-                os.system("start camera")
+                cap = cv2.VideoCapture(0) #0 for internal camera use and 1 for external
+                while True:
+                    ret, img = cap.read()
+                    if not ret:
+                        speak("Failed to access the camera.")
+                        break
+                    cv2.imshow('WebCam', img)
+                    k = cv2.waitKey(1) #stores the ASCII code of the key that was pressed during the wait. If no key is pressed, '-1' will be stored in k.
+                    if k == 27: #ASCII code of 'esc' = 27
+                        break #if 'esc' key is pressed
+                cap.release()
+                cv2.destroyAllWindows()
+            elif "play music" in query:
+                music_dir = ""
+                songs = os.listdir(music_dir)
+                rd = random.choice(songs)
+                for song in songs:
+                    if song.endswith(".mp3"):
+                        os.startfile(os.path.join(music_dir, song))
+            elif "ip address" in query:
+                ip = get('https://api.ipify.org').text
+                speak("Your IP address is " + ip)
+            elif "wikipedia" in query:
+                query = query.lower()
+                for phrase in ["what is", "who is", "tell me about", "tell me what you know about", "tell me what do you know about", "what do you know about", "what you know about", "search about", "search on", "define", "according to", "based on", "describe", "on wikipedia", "in wikipedia", "from wikipedia", "with wikipedia", "wikipedia"]:
+                    query = query.replace(phrase, "")
+                query = query.strip()
+                speak(f"Searching about {query} on Wikipedia...")
+                try:
+                    results = wikipedia.summary(query, sentences=2)
+                    speak(results)
+                    print(results)
+                    # Get the page and open in browser
+                    page = wikipedia.page(query)
+                    speak("To know more, I’ve opened the full Wikipedia page for you.")
+                    webbrowser.get('brave').open(page.url)
+                except wikipedia.exceptions.DisambiguationError as e:
+                    speak("Your query is too broad. Please be more specific.")
+                    print(f"Disambiguation error: {e}")
+                except wikipedia.exceptions.PageError:
+                    speak("I couldn't find anything on Wikipedia for that topic.")
+                except Exception as e:
+                    speak("Something went wrong while searching Wikipedia.")
+                    print(e)
+            elif "open youtube" in query:
+                speak("Opening youtube...")
+                speak("C, what do you wanna play in youtube?")
+                cm = takecommand().lower()
+                if cm != "none":
+                    try:
+                        play_first_youtube_video(cm)
+                    except Exception as e:
+                        print("Exception occurred:")
+                        traceback.print_exc()
+            elif "open google" in query:
+                speak("Opening google...")
+                webbrowser.get('brave').open("google.com")
+            elif "open linkedin" in query:
+                speak("Opening linkedin...")
+                webbrowser.get('brave').open("linkedin.com")
+            elif "open github" in query:
+                speak("Opening github...")
+                webbrowser.get('brave').open("github.com")
+
+
 
             elif any(phrase in query for phrase in ["bye", "quit", "exit", "leave"]):
                 speak("Okay, Goodbye! Have a great day C.")
