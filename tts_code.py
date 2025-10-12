@@ -7,8 +7,9 @@ import random
 import requests
 import wikipedia
 import webbrowser
-import pywhatkit as kit
+import pywhatkit
 import traceback
+import sys
 
 #defaulting webbrowser to brave
 brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
@@ -82,7 +83,7 @@ def takecommand():
         query = r.recognize_google(audio, language='en-in')
         print("User said: " + query)
     except sr.UnknownValueError:
-        speak("I didn't catch that. Please say it again.")
+        speak("I didn't understand.")
         return "None"
     except sr.RequestError:
         speak("Sorry, I'm having trouble connecting to the speech service.")
@@ -186,6 +187,7 @@ if __name__ == '__main__':
 
             elif any(phrase in query for phrase in ["bye", "quit", "exit", "leave"]):
                 speak("Okay, Goodbye! Have a great day C.")
-                break
+                sys.exit()
+            speak("Do you want any other help, C?")
     #takecommand()
     #speak("Hello")
