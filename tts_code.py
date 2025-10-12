@@ -108,7 +108,6 @@ if __name__ == '__main__':
         if 1:
             #take the command from user
             query = takecommand().lower()
-
             #logic to perform tasks
             if "open notepad" in query:
                 path = "C:\\Windows\\System32\\notepad.exe"
@@ -182,9 +181,6 @@ if __name__ == '__main__':
             elif "open github" in query:
                 speak("Opening github...")
                 webbrowser.get('brave').open("github.com")
-
-
-
             elif any(phrase in query for phrase in ["bye", "quit", "exit", "leave"]):
                 speak("Okay, Goodbye! Have a great day C.")
                 sys.exit()
