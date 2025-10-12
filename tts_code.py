@@ -1,9 +1,7 @@
 import datetime
 import os
-import time
 import pyttsx3
 import speech_recognition as sr
-import os
 
 #function to generate speech from text
 def speak(text):
