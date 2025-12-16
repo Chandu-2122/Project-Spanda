@@ -9,33 +9,51 @@ import wikipedia
 import webbrowser
 import pywhatkit as kit
 import traceback
-import sys
+import sys, subprocess
 import time
 import pyjokes
 import pyautogui
 import pygetwindow as gw
+from newsapi import NewsApiClient
+import requests
+
+
+# OLLAMA CONFIG
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "llama3.2:latest"
 
 #defaulting webbrowser to brave
 brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
 webbrowser.register('brave', None, webbrowser.BackgroundBrowser(brave_path))
 
-#function to generate speech from text
-def speak(text):
+
+def speak(text, rate=250, volume=1.0, voice_id=1):
     """
-    Converts the given text to speech using a fresh engine instance.
+    Converts the given text to speech using a fresh engine instance, with optional custom rate, volume, and voice.
 
     Parameters:
         text (str): Text to speak.
+        rate (int, optional): The speed at which the speech is spoken. Default is 250.
+        volume (float, optional): The volume of the speech. Default is 1.0 (max volume).
+        voice_id (int, optional): The index of the voice. Default is 1 for female. Use 0 for male.
 
     Returns:
         None
     """
+    # Initialize the speech engine
     engine = pyttsx3.init('sapi5')  # fresh instance
-    engine.setProperty('rate', 250)
-    engine.setProperty('volume', 1.0)
+    # Set properties
+    engine.setProperty('rate', rate)
+    engine.setProperty('volume', volume)
+    # Get available voices
     voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[1].id)  # 1 for female, 0 for male
-
+    # Set the desired voice
+    if 0 <= voice_id < len(voices):  # Check if the voice_id is valid
+        engine.setProperty('voice', voices[voice_id].id)
+    else:
+        print("Invalid voice_id. Using default voice.")
+        engine.setProperty('voice', voices[1].id)  # Default to female if invalid
+    # Print and speak the text
     print(text)
     engine.say(text)
     engine.runAndWait()
@@ -62,38 +80,43 @@ def wish():
     speak(full_message)
 
 #function to generate text from speech
-def takecommand():
+def takecommand(timeout=5, phrase_time_limit=8, silent=False):
     """
-    Listens to audio input from the microphone and attempts to convert it to text
-    using Google's speech recognition API.
+    Listens to microphone input and returns recognized text.
+
+    Parameters:
+        timeout (int, optional): Seconds to wait for phrase start.
+        phrase_time_limit (int, optional): The maximum length of time (in seconds) for a single phrase. Default is 8 seconds.
+        silent (bool, optional): If True, suppresses error messages and the "Listening..." prompt. Default is False.
 
     Returns:
-        str: The recognized text as a string. Returns 'None' if recognition fails.
-
-    Raises:
-        sr.WaitTimeoutError: If no speech is detected within the timeout.
-        sr.UnknownValueError: If the speech is unintelligible.
-        sr.RequestError: If there is an issue with the Google API request.
+        str: Recognized speech or 'None' if no speech was detected.
     """
-    # obtain audio from the microphone
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Listening...")
+        if not silent:
+            print("Listening...")
         r.pause_threshold = 1
-        audio = r.listen(source)#, timeout=4, phrase_time_limit=8)
-
+        try:
+            audio = r.listen(source, timeout=timeout, phrase_time_limit=phrase_time_limit)
+        except sr.WaitTimeoutError:
+            if not silent:
+                print("No speech detected.")
+            return "None"
     try:
-        print("Recognizing...")
-        #google sr works with internet connection
+        if not silent:
+            print("Recognizing...")
         query = r.recognize_google(audio, language='en-in')
-        print("User said: " + query)
+        print("User said:", query)
+        return query
     except sr.UnknownValueError:
-        speak("I didn't understand.")
+        if not silent:
+            speak("I didn't understand.")
         return "None"
     except sr.RequestError:
-        speak("Sorry, I'm having trouble connecting to the speech service.")
+        if not silent:
+            speak("Sorry, I'm having trouble connecting to the speech service.")
         return "None"
-    return query
 
 #plays first youtube video from search results
 def play_first_youtube_video(search_query):
@@ -118,15 +141,88 @@ def close_application(app_name):
         speak("Couldn't close the application.")
         print("Error:", e)
 
+#fetch and latest news
+def news():
+    """
+       Fetches the latest news headlines and reads them aloud using text-to-speech.
+       It listens for commands such as "stop" to stop reading, and "expand" or "read it" to read more details of an article.
+
+       Parameters:
+           None
+
+       Returns:
+           None
+
+       Behavior:
+           - Reads the title of each news article aloud.
+           - After each title, listens for user commands to:
+             - "stop" or "exit": Stops the news reading.
+             - "expand", "read it", or "tell me more": Expands to read the description of the article.
+             - Moves to the next article if no valid command is heard.
+       """
+    # Initialize News API with your API Key
+    newsapi = NewsApiClient(api_key='781c4793a02d484d809e8e430a78e0a4')
+    # Get the latest headlines
+    top_headlines = newsapi.get_top_headlines(language='en')
+    print(f"Number of news articles: {len(top_headlines['articles'])}")
+    # Print the headlines
+
+    for article in top_headlines['articles']:
+        print("----")
+        speak(text = article['title'],rate=200, volume=1.0, voice_id=0)
+        # While speaking, listen for commands or keywords
+        command = takecommand(timeout=4, phrase_time_limit=4, silent=True).lower()
+        # Stop reading if "stop" is detected
+        if command and ("stop" in command or "exit" in command):
+            speak("Stopping reading...")
+            break
+        # Listen for keywords and read the description of the relevant article
+        elif command and ("read it" in command or "tell me more" in command or "expand" in command):
+            speak(text="okay", rate=200, volume=1.0, voice_id=0)
+            description = article.get('description', "No description available.")
+            speak(text = description, rate=200, volume=1.0, voice_id=0)
+        elif command and ("next" in command or "what's next" in command or "skip" in command):
+            continue
+        speak(text="next", rate=200, volume=1.0, voice_id=0)
+
+#Generate reply using Ollama LLM
+
+
+WAKE_WORDS = ["hey spanda", "wake up", "spanda", "hey", "are you there", "bro", "dude"]
+SLEEP_WORDS = ["sleep now", "go to sleep", "be quiet", "just wait", "wait"]
+def ask_llama(prompt):
+    try:
+        system_prompt = (
+            "You are Project Spanda. Your job is to make the user be conscious about himself/herself."
+            "Whatever is asked answer briefly and clearly and do not mention that you are an AI."
+        )
+        payload = { 
+            "model": OLLAMA_MODEL, 
+            "prompt": f"{system_prompt}\nUser: {prompt}\nAssistant:", 
+            "temperature": 0.7, 
+            "stream": False 
+            }
+        response = requests.post(OLLAMA_URL, json=payload, timeout=60) 
+        return response.json().get("response", "I couldn't think of an answer.") 
+    except Exception as e: 
+        print("LLM Error:", e) 
+    return "Sorry, I'm having trouble thinking right now."
+
 
 if __name__ == '__main__':
     wish()
+    is_awake = True  # Start awake
+
     while True:
-        if 1:
+        if is_awake:
             #take the command from user
             query = takecommand().lower()
+            if any(phrase in query for phrase in SLEEP_WORDS):
+                speak("Okay, I am going to sleep. Just say 'Hey Spanda' to wake me up.")
+                is_awake = False
+                continue
             #logic to perform tasks
-            if "open notepad" in query:
+            elif "open notepad" in query:
                 path = "C:\\Windows\\System32\\notepad.exe"
                 speak("Opening notepad...")
                 os.startfile(path)
@@ -289,17 +385,45 @@ if __name__ == '__main__':
             elif "exit fullscreen" in query:
                 speak("Exiting fullscreen...")
                 pyautogui.press("esc")
-            elif "shutdown the system" in query:
+            elif "news" in query:
+                speak("Fetching the latest news, please wait...")
+                news()
+            elif "screenshot" in query:
+                speak("What do you want the screenshot to be saved as...")
+                filename = takecommand().lower()
+                # If the user didn't specify a filename, generate one based on the current timestamp
+                if filename == "none" or filename == "None" or filename == "":  # In case of no user input
+                    filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # Example: 2025-10-14_13-45-30.png
+                speak("Taking screenshot, don't move and please wait...")
+                ss = pyautogui.screenshot()
+                ss.save(f"{filename}.png")
+                speak(f"Screenshot saved as {filename}.png")
+            elif "shutdown the system" in query or "shut down" in query:
                 speak("Shutting down the system...")
                 os.system("shutdown /s")
             elif "restart" in query:
                 speak("Restarting the system...")
                 os.system("shutdown /r")
-
             elif any(phrase in query for phrase in ["bye", "quit", "exit", "leave"]):
                 speak("Okay, Goodbye! Have a great day C.")
                 sys.exit()
-            time.sleep(0.5)
-            speak("Do you want any other help, C?")
-    #takecommand()
+
+            # LLM FALLBACK
+            else:
+                speak("Let me think...")
+                response = ask_llama(query)
+                speak(response)
+
+        else:
+            print("Sleeping... Waiting for wake word.")
+            query = takecommand(timeout=4, silent=True).lower()
+
+            if query == "none":
+                continue  # nothing said, just keep waiting quietly
+
+            if any(wake_word in query for wake_word in WAKE_WORDS):
+                speak("Yes C, I am listening...")
+                is_awake = True
+
+#takecommand()
     #speak("Hello")

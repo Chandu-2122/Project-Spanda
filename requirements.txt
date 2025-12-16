@@ -8,3 +8,5 @@ pywhatkit
 pyjokes
 pyautogui
 pygetwindow
+newsapi-python
+
