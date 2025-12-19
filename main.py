@@ -69,9 +69,10 @@ def main():
 
             # LLM FALLBACK
             else:
-               speak("Let me think...")
-               response = ask(query)
-               speak(response)
+                speak("Let me think...")
+                response = ask(query, memory)
+                memory.add(query, response)
+                speak(response)
 
         else:
             print("Sleeping... Waiting for wake word.")

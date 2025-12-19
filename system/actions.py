@@ -174,7 +174,7 @@ def fullscreen() -> None:
     """
     pyautogui.press("f")
 
-def news():
+def news() -> None :
     """
        Fetches the latest news headlines and reads them aloud using text-to-speech.
        It listens for commands such as "stop" to stop reading, and "expand" or "read it" to read more details of an article.

@@ -1,12 +1,9 @@
 pyttsx3
 speechrecognition
 pyaudio
-opencv-python
-requests
-wikipedia
 pywhatkit
 pyjokes
 pyautogui
 pygetwindow
 newsapi-python
-
+ollama

@@ -1,42 +1,38 @@
-# llm/ollama.py
-
-import requests
-from config import OLLAMA_URL, OLLAMA_MODEL
-
-SYSTEM_PROMPT = (
-    "You are Project Spanda. "
-    "Your purpose is to make the user conscious and aware. "
-    "Answer briefly and clearly. "
-    "Do not say you are an AI."
-)
+import ollama
+from memory.chat_memory import ChatMemory
 
 
-def ask(prompt: str) -> str:
+SYSTEM_PROMPT = """You are Spanda, a helpful voice assistant.
+You remember recent conversation context when it is provided.
+Answer clearly and concisely.
+"""
+
+
+def ask(query: str, memory: ChatMemory) -> str:
     """
-    Generate a response from the Ollama LLM.
-
-    Args:
-        prompt (str): User's input prompt.
-
-    Returns:
-        str: Generated assistant response.
+    Build prompt using memory and send to Ollama safely.
     """
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": f"{SYSTEM_PROMPT}\nUser: {prompt}\nAssistant:",
-        "temperature": 0.7,
-        "stream": False
-    }
-
     try:
-        response = requests.post(
-            OLLAMA_URL,
-            json=payload,
-            timeout=60
+        context = memory.context()
+
+        prompt = f"""{SYSTEM_PROMPT}
+
+Conversation so far:
+{context}
+
+User: {query}
+Assistant:
+""".strip()
+
+        response = ollama.chat(
+            model="llama3.2:latest",
+            messages=[
+                {"role": "user", "content": prompt}],
         )
-        return response.json().get(
-            "response",
-            "I couldn't think of an answer."
-        )
-    except Exception:
-        return "I'm having trouble thinking right now."
+
+        return response["message"]["content"]
+
+    except Exception as e:
+        # Fail gracefully
+        print(f"[LLM ERROR] {e}")
+        return "Sorry, I ran into a problem while thinking. Please try again."

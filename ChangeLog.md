@@ -51,13 +51,16 @@ All notable changes to **Project Spanda** will be documented in this file.
 - 🗣️ Natural language question answering via LLM
 - 🔄 Automatic switch between command-based logic and AI reasoning
 - ⚙️ Configurable system prompt to define Project Spanda’s personality
+- 💾 Short-term conversational memory via ChatMemory to retain last N user–assistant interactions, allowing context-aware responses and recall
 
 #### Changed
 - 🧩 Assistant now attempts reasoning before responding with default errors
+- 🔄 LLM fallback now uses memory context to provide more coherent answers
 
 #### Notes
 - LLM runs **fully locally** via Ollama (no cloud dependency)
 - Voice output continues to use `pyttsx3`
+- Memory is currently RAM-only; resets on assistant restart
 
 ---
 
