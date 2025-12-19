@@ -2,21 +2,71 @@
 
 All notable changes to **Project Spanda** will be documented in this file.
 
-## [2.0.0] - Upcoming
-### 🧠 LLM Integration and User Voice Cloning 🗣️🎙️
+## [3.0.0] - Upcoming
+### 🗣️🎙️User Voice Cloning
+#### Added
+- 
+
+#### Changed
+- 
+
+#### Notes
+- 
 
 ---
 
-## [1.1.0] - 2025-10-13
+## [2.1.0] - Planned
+### 🎯 Intent-Based Command Routing
+
+#### Added
+- 🧠 Intent classification for user queries:
+  - Command
+  - Question
+  - Conversation
+  - System control
+- 🔀 Dynamic routing between:
+  - Rule-based command execution
+  - LLM-based responses
+- ❓ Clarification prompts for ambiguous inputs
+
+#### Changed
+- 🧩 Replaced pure `if/elif` fallback with intent-first decision flow
+- 🤖 Reduced unnecessary LLM calls for known commands
+
+#### Improved
+- 🎯 Accuracy of command execution
+- ⚡ Faster and more relevant responses
+- 🗣️ More natural interaction flow
+
+#### Notes
+- Intent detection initially rule-based, with optional LLM-assisted classification
+
+---
+
+## [2.0.0] - 2025-12-16
+### 🧠 Local LLM Integration (Ollama)
+#### Added
+- 🤖 Integrated local LLM using **Ollama (llama3.2:latest)**
+- 🧠 Intelligent fallback response system when no voice command matches
+- 🗣️ Natural language question answering via LLM
+- 🔄 Automatic switch between command-based logic and AI reasoning
+- ⚙️ Configurable system prompt to define Project Spanda’s personality
+
+#### Changed
+- 🧩 Assistant now attempts reasoning before responding with default errors
+
+#### Notes
+- LLM runs **fully locally** via Ollama (no cloud dependency)
+- Voice output continues to use `pyttsx3`
+
+---
+
+## [1.1.0] - 2025-10-14
 ### App & Window Control + Media Actions
 #### Added
-- 🗣️📄 Voice-controlled closing of Notepad, Command Prompt, and Browser
+- 🗣️📄 Voice-controlled closing of Browser
 - 😂 Tells jokes on command
 - 📴 System shutdown and 🔄 restart via voice
-- 🔒 Locking the screen using voice command
-- 🖥️⬇️ Minimize all windows (go to desktop)
-- 🔀 Switch between windows using "alt + tab"
-- 🗂️ Open Task View and navigate between open windows (with voice-based "next", "back", "enter", "cancel")
 - Tab navigation in browsers:
   - ➡️⬅️ Switch to next/previous tab with window title feedback
   - ❌🗂️ Close current tab and announce its title
@@ -25,9 +75,9 @@ All notable changes to **Project Spanda** will be documented in this file.
   - 🔇🔊 Mute/unmute video
   - ⛶ Fullscreen and 🔙 exit fullscreen
 - 📰 Reads latest news
-- 📷 Takes screenshot
+`- 📷 Takes screenshot
 - 😴 Sleeps and wakes up🫡 on command
-
+`
 #### Fixed
 - 🕰️ Mentioning time while greeting
 
@@ -40,17 +90,8 @@ All notable changes to **Project Spanda** will be documented in this file.
 - 🗣️ Greeting system based on time (Good Morning, Afternoon, Evening)
 - 🎧 Speech recognition via microphone input
 - 🧠 Command parsing and handling
-- 📄 Open Notepad via voice command
-- 💻 Open Command Prompt via voice
-- 📷 Open camera using OpenCV
-- 🌐 Open popular websites:
-  - Google
-  - LinkedIn
-  - GitHub
 - 🎶 YouTube integration:
   - Search and play the first result via voice
-- 🌐 Wikipedia search (voice-triggered + article preview + full-page open)
-- 🌍 Fetch and speak the public IP address
 - ❌ Exit the assistant via voice (e.g., "bye", "quit", "leave")
 
 #### Notes:
