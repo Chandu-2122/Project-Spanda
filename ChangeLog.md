@@ -2,48 +2,56 @@
 
 All notable changes to **Project Spanda** will be documented in this file.
 
-## [3.0.0] - Upcoming
-### 🗣️🎙️User Voice Cloning
+
+## Version[2.1.0] - 2025-12-21
+### 🧘 Voice-First Reflection Engine & Architecture Stabilization
 #### Added
-- 
+- 🧘 Structured voice-led reflection session workflow:
+  - Check-in → Reflection → Tuning → Planning → Closure
+- 🧠 Session state tracking using a non-interpretive `state` dictionary
+- 📝 Neutral session summary generation using the user’s own words
+- 💾 Optional long-term reflection memory with explicit user consent
+- 🗂️ Persistent ReflectionMemory to optionally save session summaries to a JSON file.
+- ⚡ Exit reflection session gracefully after max retries to continue with normal LLM fallback.
+- 🎛️ Profile-driven reflection preferences (tone, structure, pace, prompt style)
+- 🧩 Safe, bounded profile updates based only on explicit user feedback
+- 🛑 Consent-first design for saving and reading back reflections
 
 #### Changed
-- 
+- 📦 Modularized speech, workflow, memory, and personalization layers
+
+#### Fixed
+- 🐛 Potential crashes from unavailable audio devices
+- 🐛 Inconsistent function signatures across internal modules
 
 #### Notes
-- 
+- This release establishes a **stable, voice-first reflection foundation**
+- LLM-guided reflection modules remain present but **inactive**
+- No behavioral inference or advice is generated in reflection mode
 
 ---
 
-## [2.1.0] - Planned
-### 🎯 Intent-Based Command Routing
-
-#### Added
-- 🧠 Intent classification for user queries:
-  - Command
-  - Question
-  - Conversation
-  - System control
-- 🔀 Dynamic routing between:
-  - Rule-based command execution
-  - LLM-based responses
-- ❓ Clarification prompts for ambiguous inputs
-
-#### Changed
-- 🧩 Replaced pure `if/elif` fallback with intent-first decision flow
-- 🤖 Reduced unnecessary LLM calls for known commands
-
-#### Improved
-- 🎯 Accuracy of command execution
-- ⚡ Faster and more relevant responses
-- 🗣️ More natural interaction flow
+## Version[*.*.*] - Roadmap / Planning Marker
+### 🧩 Advanced Memory, Personality & Tool Integration (WIP)
+#### Added / In Progress
+- 💾 Retrieval-Augmented Generation (RAG) for long-term knowledge:
+Spanda will be able to reference personal notes and files to provide context-aware answers. 
+- 🤖 Fine-tuning / personality alignment:
+Efforts underway to adjust Spanda’s responses to reflect a distinct character and better understanding of the user [Note: to be done only if no fine-tuning method doesn't work good]. 
+- 📝 Note-taking capabilities / tool usage:
+Spanda will be able to create, read, and update notes using local files or applications like Notepad. 
+- 🔄 Dynamic personality switching:
+Experimental system prompts allow Spanda’s tone and behavior to change on demand. 
+- 🛠️ LangChain / LangGraph pipelines:
+Frameworks being integrated to orchestrate memory, RAG retrieval, and tool-based actions.
 
 #### Notes
-- Intent detection initially rule-based, with optional LLM-assisted classification
+- No production code was released under this version
+- Features listed here may ship across multiple future versions
 
 ---
 
-## [2.0.0] - 2025-12-16
+## Version[2.0.0] - 2025-12-16
 ### 🧠 Local LLM Integration (Ollama)
 #### Added
 - 🤖 Integrated local LLM using **Ollama (llama3.2:latest)**
@@ -64,7 +72,7 @@ All notable changes to **Project Spanda** will be documented in this file.
 
 ---
 
-## [1.1.0] - 2025-10-14
+## Version[1.1.0] - 2025-10-13
 ### App & Window Control + Media Actions
 #### Added
 - 🗣️📄 Voice-controlled closing of Browser
@@ -86,9 +94,8 @@ All notable changes to **Project Spanda** will be documented in this file.
 
 ---
 
-## [1.0.0] - 2025-10-12
+## Version[1.0.0] - 2025-10-12
 ### 🎉 Initial Release
-
 #### Added:
 - 🗣️ Greeting system based on time (Good Morning, Afternoon, Evening)
 - 🎧 Speech recognition via microphone input

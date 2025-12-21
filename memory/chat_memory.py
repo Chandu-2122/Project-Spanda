@@ -11,7 +11,7 @@ class ChatMemory:
     to provide short-term conversational context.
     """
 
-    def __init__(self, max_turns: int = 10):
+    def __init__(self, max_turns: int = 10000):
         """
         Initialize chat memory.
 

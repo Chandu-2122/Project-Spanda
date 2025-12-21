@@ -1,3 +1,5 @@
+#system\speech.py
+
 import datetime, time
 import pyttsx3
 import speech_recognition as sr
@@ -67,27 +69,31 @@ def take_command(timeout=5, phrase_time_limit=8, silent=False):
         str: Recognized speech or 'None' if no speech was detected.
     """
     r = sr.Recognizer()
-    with sr.Microphone() as source:
-        if not silent:
-            print("Listening...")
-        r.pause_threshold = 1
-        try:
-            audio = r.listen(source, timeout=timeout, phrase_time_limit=phrase_time_limit)
-        except sr.WaitTimeoutError:
-            if not silent:
-                print("No speech detected.")
-            return "None"
     try:
-        if not silent:
-            print("Recognizing...")
-        query = r.recognize_google(audio, language='en-in')
-        print("User said:", query)
-        return query
-    except sr.UnknownValueError:
-        if not silent:
-            speak("I didn't understand.")
-        return "None"
-    except sr.RequestError:
-        if not silent:
-            speak("Sorry, I'm having trouble connecting to the speech service.")
+        with sr.Microphone() as source:
+            if not silent:
+                print("Listening...")
+            r.pause_threshold = 1
+            try:
+                audio = r.listen(source, timeout=timeout, phrase_time_limit=phrase_time_limit)
+            except sr.WaitTimeoutError:
+                if not silent:
+                    print("No speech detected.")
+                return "None"
+        try:
+            if not silent:
+                print("Recognizing...")
+            query = r.recognize_google(audio, language='en-in')
+            print("User said:", query)
+            return query
+        except sr.UnknownValueError:
+            if not silent:
+                speak("I didn't understand.")
+            return "None"
+        except sr.RequestError:
+            if not silent:
+                speak("Sorry, I'm having trouble connecting to the speech service.")
+            return ""
+    except OSError:
+        speak("Microphone is not available.")
         return "None"

@@ -4,6 +4,9 @@ from config import *
 from system.actions import *
 from llm.ollama import *
 from memory.chat_memory import *
+from core.workflow import run_reflection_session
+from llm.system_prompt import SYSTEM_PROMPT
+
 
 import sys
 
@@ -15,13 +18,14 @@ def main():
     Main event loop for Project Spanda.
 
     Responsibilities:
-    - Handle wake / sleep state
+    - Handle wake/sleep state
     - Route commands to system actions
-    - Use LLM as a fallback
+    - Run reflection sessions safely
+    - Use LLM as fallback
     - Store conversational memory
     """
     global awake
-    wish()
+    wish() # greet user
 
     is_awake = True  # Start awake
     while True:
@@ -30,6 +34,14 @@ def main():
             query = take_command().lower()
             if query == "none":
                 continue
+            # Reflection session trigger
+            elif any(phrase in query for phrase in ["reflect", "check in", "self reflect", "session"]):
+                run_reflection_session(memory)
+            #exit
+            elif any(phrase in query for phrase in ["bye", "quit", "exit", "leave"]):
+                speak("Okay, Goodbye! Have a great day C.")
+                sys.exit()
+            #sleep
             elif any(phrase in query for phrase in SLEEP_WORDS):
                 speak("Okay, I am going to sleep. Just say 'Hey Spanda' to wake me up.")
                 is_awake = False
@@ -63,18 +75,16 @@ def main():
                 shutdown()
             elif "restart" in query:
                 restart()
-            elif any(phrase in query for phrase in ["bye", "quit", "exit", "leave"]):
-                speak("Okay, Goodbye! Have a great day C.")
-                sys.exit()
 
             # LLM FALLBACK
             else:
                 speak("Let me think...")
-                response = ask(query, memory)
+                response = ask(query, memory, SYSTEM_PROMPT)
                 memory.add(query, response)
                 speak(response)
 
         else:
+            # Sleeping state: wait for wake word
             print("Sleeping... Waiting for wake word.")
             query = take_command(timeout=4, silent=True).lower()
 

@@ -1,38 +1,36 @@
+# llm/ollama.py
+
 import ollama
 from memory.chat_memory import ChatMemory
 
 
-SYSTEM_PROMPT = """You are Spanda, a helpful voice assistant.
-You remember recent conversation context when it is provided.
-Answer clearly and concisely.
-"""
-
-
-def ask(query: str, memory: ChatMemory) -> str:
+def ask(query: str, memory: ChatMemory, system_prompt: str) -> str:
     """
     Build prompt using memory and send to Ollama safely.
     """
     try:
-        context = memory.context()
+        messages = [
+            {"role": "system", "content": system_prompt},
+        ]
 
-        prompt = f"""{SYSTEM_PROMPT}
+        if memory.buffer:
+            messages.append({
+                "role": "assistant",
+                "content": memory.context()
+            })
 
-Conversation so far:
-{context}
-
-User: {query}
-Assistant:
-""".strip()
+        messages.append({
+            "role": "user",
+            "content": query
+        })
 
         response = ollama.chat(
             model="llama3.2:latest",
-            messages=[
-                {"role": "user", "content": prompt}],
+            messages=messages,
         )
 
         return response["message"]["content"]
 
     except Exception as e:
-        # Fail gracefully
         print(f"[LLM ERROR] {e}")
-        return "Sorry, I ran into a problem while thinking. Please try again."
+        return "Sorry, I ran into a problem while thinking."
