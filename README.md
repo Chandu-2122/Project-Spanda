@@ -1,4 +1,4 @@
-Project Spanda – Conscious Multimodal Assistant (Ongoing)
+# Project Spanda – Conscious Multimodal Assistant (Ongoing)
 
 Project Spanda is an ongoing, privacy-first AI assistant designed to support self-awareness and reflection without outsourcing human judgment to AI. 
 
